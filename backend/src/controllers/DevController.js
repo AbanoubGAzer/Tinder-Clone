@@ -1,9 +1,10 @@
 const axios = require('axios');
-const Dev = require("../models/Dev");
+const Dev = require('../models/Dev');
 
 module.exports = {
     //Listar dev
     async index(req, res){
+
         const { user } = req.headers;
 
         const loggedDev = await Dev.findById(user);
@@ -21,14 +22,18 @@ module.exports = {
 
     //Criar dev
     async store(req, res){
-        //console.log(req.body.username)
         const { username } = req.body;
 
         //Verificar se já não existe o usuário
         const userExists = await Dev.findOne({ user: username });
         if (userExists) {
+            console.log("OPAAA ESSE USUÁRIO JÁ FOI CRIADO")
             return res.json(userExists);
         }
+
+        //verificar se o usuário existe mesmo
+        const userError = res.status(404).json({ error: "Verifique se este usuário existe"})
+        console.log(userError)
 
         //acesso api
         const response = await axios.get(`https://api.github.com/users/${username}`);
@@ -42,6 +47,8 @@ module.exports = {
             bio,
             avatar
         })
+
+        console.log(`USUÁRIO ${username} CRIADO COM SUCESSO`)
 
         return res.json(dev);
     }

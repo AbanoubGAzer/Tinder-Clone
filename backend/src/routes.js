@@ -11,5 +11,10 @@ routes.post('/devs', DevController.store);
 routes.post('/devs/:devId/likes', LikeController.store);
 routes.post('/devs/:devId/dislikes', DislikeController.store);
 
+// routes.post('/devs', (req, res) => {
+//   console.log(req.body)
+//   return res.json({ ok : "True"})
+// })
+
 
 module.exports = routes;
