@@ -12,4 +12,4 @@ export default createAppContainer(
     Login,
     Main,
   })
-)
+);

@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 //no lugar de VIEW usar KeyboardAvoidingView no iOS para o teclado não sobrepor o input
+import AsyncStorage from '@react-native-community/async-storage';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -7,13 +8,37 @@ import {
   StyleSheet,
   Image,
   TextInput,
-  TouchableOpacity } from 'react-native';
+  TouchableOpacity,
+} from 'react-native';
 
-import logo from '../assets/logo.png'
+import api from '../services/api';
 
-export default function Login({ navigation }){
-  function handleLogin(){
-    navigation.navigate('Main');
+import logo from '../assets/logo.png';
+
+export default function Login({ navigation }) {
+  const [user, setUser] = useState('');
+
+  //Se for dado F5 ou Sair da Aplicação e voltar, isso será executado
+  useEffect(() => {
+    // eslint-disable-next-line no-shadow
+    AsyncStorage.getItem('user').then(user => {
+      if (user) {
+        navigation.navigate('Main', { user });
+      }
+    });
+  }, [navigation]);
+
+  async function handleLogin() {
+    const response = await api.post('/devs', { username: user });
+
+    const { _id } = response.data;
+
+    //quando o usuário loga, grava informação no storage
+    await AsyncStorage.setItem('user', _id);
+
+    console.log(user, _id);
+
+    navigation.navigate('Main', { user: _id });
   }
 
   return (
@@ -29,13 +54,15 @@ export default function Login({ navigation }){
         placeholder="Digite seu usuário no github"
         placeholderTextColor="#999"
         style={styles.input}
+        value={user}
+        onChangeText={setUser}
       />
 
       <TouchableOpacity onPress={handleLogin} style={styles.button}>
         <Text style={styles.buttonText}>Enviar</Text>
-       </TouchableOpacity>
+      </TouchableOpacity>
     </KeyboardAvoidingView>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -45,7 +72,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 30,
-
   },
 
   input: {
@@ -60,17 +86,17 @@ const styles = StyleSheet.create({
 
   button: {
     height: 46,
-    alignSelf: "stretch",
-    backgroundColor: "#DF4723",
+    alignSelf: 'stretch',
+    backgroundColor: '#DF4723',
     borderRadius: 4,
     marginTop: 10,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
   buttonText: {
-    color: "#FFF",
-    fontWeight: "bold",
-    fontSize: 16
-  }
+    color: '#FFF',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
 });
